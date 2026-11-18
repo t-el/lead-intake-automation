@@ -1,0 +1,11 @@
+[project]
+name = "lead-intake-automation"
+version = "1.0.0"
+description = "Webhook -> enrich -> AI score -> CRM/Sheets -> Slack, with retries, idempotency and a dead-letter queue."
+authors = [{ name = "Taha Elkarroumy" }]
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning", "ignore:.*httpx2.*"]
