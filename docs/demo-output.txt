@@ -1,0 +1,61 @@
+### 1. Pure-Python pipeline on 8 sample leads (incl. duplicate, flaky API, dead API, invalid)
+INFO    lead_intake.notify: alert sent channel=console title=Hot lead: Sarah Chen level=info
+INFO    lead_intake.pipeline: lead processed email=sarah.chen@northwind-logistics.com score=95 tier=hot scored_by=heuristic sink_ref=sqlite:sarah.chen@northwind-logistics.com duration_ms=2
+INFO    lead_intake.notify: alert sent channel=console title=Hot lead: Claire Martin level=info
+INFO    lead_intake.pipeline: lead processed email=dr.martin@atlas-dental.fr score=72 tier=hot scored_by=heuristic sink_ref=sqlite:dr.martin@atlas-dental.fr duration_ms=2
+INFO    lead_intake.pipeline: lead processed email=tom@brightcart.io score=57 tier=warm scored_by=heuristic sink_ref=sqlite:tom@brightcart.io duration_ms=1
+INFO    lead_intake.pipeline: lead processed email=jake.p@gmail.com score=10 tier=cold scored_by=heuristic sink_ref=sqlite:jake.p@gmail.com duration_ms=1
+INFO    lead_intake.pipeline: duplicate lead skipped email=sarah.chen@northwind-logistics.com
+WARNING lead_intake.retry: transient failure, retrying step=enrich attempt=1 next_delay_s=0.13 error=enrichment API timeout for flaky-co.com (simulated)
+WARNING lead_intake.retry: transient failure, retrying step=enrich attempt=2 next_delay_s=0.28 error=enrichment API timeout for flaky-co.com (simulated)
+INFO    lead_intake.notify: alert sent channel=console title=Hot lead: Priya Nair level=info
+INFO    lead_intake.pipeline: lead processed email=ops@flaky-co.com score=87 tier=hot scored_by=heuristic sink_ref=sqlite:ops@flaky-co.com duration_ms=418
+WARNING lead_intake.retry: transient failure, retrying step=enrich attempt=1 next_delay_s=0.15 error=enrichment API 503 for down-api.com (simulated)
+WARNING lead_intake.retry: transient failure, retrying step=enrich attempt=2 next_delay_s=0.29 error=enrichment API 503 for down-api.com (simulated)
+WARNING lead_intake.retry: transient failure, retrying step=enrich attempt=3 next_delay_s=0.55 error=enrichment API 503 for down-api.com (simulated)
+ERROR   lead_intake.retry: retries exhausted step=enrich attempt=4 error=enrichment API 503 for down-api.com (simulated)
+ERROR   lead_intake.pipeline: lead moved to dead-letter queue email=info@down-api.com step=enrich dead_letter_id=1 error=enrichment API 503 for down-api.com (simulated)
+INFO    lead_intake.notify: alert sent channel=console title=Lead pipeline failure level=error
+ERROR   lead_intake.pipeline: lead moved to dead-letter queue email=not-an-email step=validate dead_letter_id=2 error=email: value is not a valid email address: An email address must have an @-sign.; name: String should have at least 1 character
+INFO    lead_intake.notify: alert sent channel=console title=Lead pipeline failure level=error
+
+=== Summary ===
+  processed      sarah.chen@northwind-logistics.com score=95 tier=hot
+  processed      dr.martin@atlas-dental.fr        score=72 tier=hot
+  processed      tom@brightcart.io                score=57 tier=warm
+  processed      jake.p@gmail.com                 score=10 tier=cold
+  duplicate      sarah.chen@northwind-logistics.com 
+  processed      ops@flaky-co.com                 score=87 tier=hot
+  dead_lettered  info@down-api.com                enrichment API 503 for down-api.com (simulated)
+  invalid        not-an-email                     email: value is not a valid email address: An email address must have an @-sign.; name: String should have at least 1 character
+  dead_lettered: 1, duplicate: 1, invalid: 1, processed: 5
+
+### 2. Dead-letter queue
+#1    enrich    info@down-api.com              TransientError: enrichment API 503 for down-api.com (simulated)
+#2    validate  not-an-email                   ValueError: email: value is not a valid email address: An email address must have an @-sign.; name: String should have at least 1 character
+
+### 3. Local CRM table (data in data/demo/crm.db)
+   95  hot   sarah.chen@northwind-logistics.com   Northwind Logistics
+   87  hot   ops@flaky-co.com                     Flaky Co
+   72  hot   dr.martin@atlas-dental.fr            Atlas Dental Group
+   57  warm  tom@brightcart.io                    BrightCart
+   10  cold  jake.p@gmail.com                     
+
+### 4. Alerts sent (mock Slack/email -> data/demo/alerts.log)
+{"ts": "2026-11-18T18:36:11.917044+00:00", "level": "info", "title": "Hot lead: Sarah Chen", "text": "Sarah Chen (Head of Operations) at Northwind Logistics: ho
+{"ts": "2026-11-18T18:36:11.919423+00:00", "level": "info", "title": "Hot lead: Claire Martin", "text": "Claire Martin (Practice Owner) at Atlas Dental Group: h
+{"ts": "2026-11-18T18:36:12.341426+00:00", "level": "info", "title": "Hot lead: Priya Nair", "text": "Priya Nair (COO) at Flaky Co: hot lead, score 87.\nScore: 
+{"ts": "2026-11-18T18:36:13.332907+00:00", "level": "error", "title": "Lead pipeline failure", "text": "Step 'enrich' failed for info@down-api.com: enrichment A
+{"ts": "2026-11-18T18:36:13.335075+00:00", "level": "error", "title": "Lead pipeline failure", "text": "Step 'validate' failed for not-an-email: email: value is
+
+### 5. HTTP API (FastAPI webhook)
+{"ok":true,"version":"1.0.0","sink":"sqlite","notifier":"console","ai":"heuristic"}
+INFO    lead_intake.notify: alert sent channel=console title=Hot lead: Mia Vogel level=info
+INFO    lead_intake.pipeline: lead processed email=mia@lumen-legal.de score=75 tier=hot scored_by=heuristic sink_ref=sqlite:mia@lumen-legal.de duration_ms=3
+{"status":"processed","email":"mia@lumen-legal.de","score":75,"tier":"hot","sink_ref":"sqlite:mia@lumen-legal.de","dead_letter_id":null,"error":null,"duration_ms":3,"details":{"summary":"Mia Vogel (Managing Partner) at Lumen Legal: hot lead, score 75.","reasons":["business email","decision maker (Managing Partner)","budget $6,000","intent: budget, automate"]}}
+  -> HTTP 201
+INFO    lead_intake.pipeline: duplicate lead skipped email=mia@lumen-legal.de
+{"status":"duplicate","email":"mia@lumen-legal.de","score":null,"tier":null,"sink_ref":null,"dead_letter_id":null,"error":null,"duration_ms":0,"details":{}}
+  -> HTTP 200 (duplicate)
+
+Demo complete.

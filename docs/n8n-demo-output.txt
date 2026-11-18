@@ -1,0 +1,14 @@
+# n8n end-to-end run (n8n 1.123.98, workflow imported with `n8n import:workflow`, FastAPI step service on :8000)
+$ curl -X POST localhost:5678/webhook/lead-intake -d '{"email":"sarah.chen@northwind-logistics.com","name":"Sarah Chen","title":"Head of Operations","budget":"$8,000","message":"automate ASAP"}'
+{"status":"processed","email":"sarah.chen@northwind-logistics.com","score":95,"tier":"hot"}  -> HTTP 201
+$ (same email again)
+{"status":"duplicate","email":"sarah.chen@northwind-logistics.com"}  -> HTTP 200
+$ curl ... -d '{"email":"tom@brightcart.io","name":"Tom Reed","message":"exploring"}'
+{"status":"processed","email":"tom@brightcart.io","score":42,"tier":"warm"}  -> HTTP 201
+$ curl ... -d '{"email":"info@down-api.com","name":"Down"}'      # enrichment API permanently down
+{"status":"dead_lettered","dead_letter_id":1}  -> HTTP 202
+
+$ curl localhost:8000/dead-letters
+[{"id":1,"email":"info@down-api.com","step":"n8n:Enrich + AI score (Python step)","error":"503 ...","payload":{...}}]
+$ tail data/alerts.log      # Slack node -> /mock/slack when SLACK_WEBHOOK_URL is empty
+{"title": "Slack (mock)", "text": ":fire: *Hot lead:* Sarah Chen (Head of Operations) at Northwind Logistics: hot lead, score 95. ..."}
