@@ -1,0 +1,10 @@
+[
+  {"email": "sarah.chen@northwind-logistics.com", "name": "Sarah Chen", "title": "Head of Operations", "budget": "$8,000", "message": "We copy shipment data between Shopify, our WMS and Google Sheets by hand. Looking to automate this ASAP.", "source": "website"},
+  {"email": "dr.martin@atlas-dental.fr", "name": "Claire Martin", "title": "Practice Owner", "budget": "$2,500", "message": "Need appointment reminders integrated with our booking tool.", "source": "typeform"},
+  {"email": "tom@brightcart.io", "name": "Tom Reed", "title": "Marketing Coordinator", "message": "Just exploring options for now.", "source": "website"},
+  {"email": "jake.p@gmail.com", "name": "Jake P", "message": "hi, how much for a chatbot?", "source": "website"},
+  {"email": "SARAH.CHEN@northwind-logistics.com", "name": "Sarah Chen", "title": "Head of Operations", "message": "Resubmitted the form by accident", "source": "website"},
+  {"email": "ops@flaky-co.com", "name": "Priya Nair", "title": "COO", "budget": "10k", "message": "Replace our Zapier mess with something reliable, budget approved.", "source": "linkedin"},
+  {"email": "info@down-api.com", "name": "Down Api", "title": "Founder", "message": "Interested in automation.", "source": "website"},
+  {"email": "not-an-email", "name": "", "source": "website"}
+]

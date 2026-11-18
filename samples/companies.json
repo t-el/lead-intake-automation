@@ -1,0 +1,7 @@
+{
+  "northwind-logistics.com": {"company_name": "Northwind Logistics", "industry": "Logistics", "employees": 420, "country": "US"},
+  "atlas-dental.fr": {"company_name": "Atlas Dental Group", "industry": "Healthcare", "employees": 85, "country": "FR"},
+  "brightcart.io": {"company_name": "BrightCart", "industry": "E-commerce", "employees": 35, "country": "UK"},
+  "lumen-legal.de": {"company_name": "Lumen Legal", "industry": "Legal services", "employees": 12, "country": "DE"},
+  "flaky-co.com": {"company_name": "Flaky Co", "industry": "SaaS", "employees": 60, "country": "CA"}
+}
